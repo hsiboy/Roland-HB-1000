@@ -17,7 +17,6 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
-            # Add these steps to get Pico SDK
             - name: Download Pico SDK
               run: git clone https://github.com/raspberrypi/pico-sdk.git
             
@@ -26,16 +25,14 @@ jobs:
               run: git submodule update --init
             
             - name: Get SDK import file
-              run: |
-                cp pico-sdk/external/pico_sdk_import.cmake .
-                echo "PICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk" >> $GITHUB_ENV
+              run: cp pico-sdk/external/pico_sdk_import.cmake .
 
             - name: Build
               id: build
               uses: samyarsadat/Pico-Build-Action@v1
               with:
                   source_dir: "."
-                  cmake_args: "-DCMAKE_BUILD_TYPE=Debug -DPICO_SDK_PATH=${{ env.PICO_SDK_PATH }}"
+                  cmake_args: "-DCMAKE_BUILD_TYPE=Debug -DPICO_SDK_PATH=/github/workspace/pico-sdk"
                   board_name: "pico"
                   output_dir: "build"
                   output_ext: "*.uf2 *.elf *.elf.map"
