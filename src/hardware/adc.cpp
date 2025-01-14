@@ -1,6 +1,7 @@
 #include "adc.h"
 #include "hardware/spi.h"
 #include "hardware/gpio.h"
+#include "pico/stdlib.h"
 
 namespace pg1000 {
 namespace hardware {
@@ -47,10 +48,15 @@ void ADC::chip_select(uint8_t chip, bool select) {
 }
 
 uint16_t ADC::transfer(uint8_t chip, uint8_t channel) {
+    // MCP3008 command bits
+    static constexpr uint8_t START_BIT = 0x01;
+    static constexpr uint8_t SINGLE_ENDED = 0x80;
+    
+    // Prepare command bytes
     uint8_t tx_data[3] = {
-        0x01,                    // Start bit
-        0x80 | (channel << 4),   // Single-ended, channel select
-        0x00                     // Don't care
+        START_BIT,                    // Start bit
+        static_cast<uint8_t>(SINGLE_ENDED | ((channel & 0x07) << 4)),  // Single-ended mode + channel
+        0x00                          // Don't care byte
     };
     uint8_t rx_data[3] = {0};
     
@@ -60,7 +66,11 @@ uint16_t ADC::transfer(uint8_t chip, uint8_t channel) {
     
     chip_select(chip, false);
     
-    // Combine result (10 bits)
+    // Combine result bits from received bytes
+    // MCP3008 returns:
+    // Byte 1: Null
+    // Byte 2: [B9][B8][B7][B6][B5][B4][B3][B2]
+    // Byte 3: [B1][B0][x][x][x][x][x][x]
     return ((rx_data[1] & 0x03) << 8) | rx_data[2];
 }
 
