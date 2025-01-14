@@ -3,6 +3,8 @@
 #include "pico/time.h"
 #include <cstring>
 #include <algorithm>
+#include <cstdio>    // for snprintf
+#include "hardware/gpio.h"  // for GPIO_FUNC_I2C
 
 namespace pg1000 {
 namespace hardware {
