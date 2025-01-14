@@ -1,7 +1,7 @@
 #include "gpio.h"
 #include "hardware/i2c.h"
 #include "pico/time.h"
-
+#include "hardware/gpio.h"  // for GPIO_FUNC_I2C
 namespace pg1000 {
 namespace hardware {
 
