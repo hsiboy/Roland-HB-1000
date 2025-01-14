@@ -11,6 +11,7 @@ pico_sdk_init()
 
 add_executable(roland_pg1000
     src/main.cpp
+    src/controller.cpp
 )
 
 # Add pico_stdlib library which aggregates commonly used features
