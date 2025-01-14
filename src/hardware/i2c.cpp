@@ -2,6 +2,10 @@
 #include "hardware/i2c.h"
 #include "pico/stdlib.h"
 #include <cstring>
+#include <cstdio>    // for printf, snprintf
+#include <cstddef>   // for size_t
+#include "hardware/gpio.h"  // for GPIO_FUNC_I2C
+#include "pico/stdlib.h"
 
 namespace pg1000 {
 namespace hardware {
