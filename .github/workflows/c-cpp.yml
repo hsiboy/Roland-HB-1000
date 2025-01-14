@@ -21,8 +21,11 @@ jobs:
               id: build
               uses: samyarsadat/Pico-Build-Action@v1
               with:
-                  source_dir: "src"  # Changed from "/src" to "src"
+                  source_dir: "."  # Changed from "src" to "." to use repository root
                   cmake_args: "-DCMAKE_BUILD_TYPE=Debug"
+                  board_name: "pico"
+                  output_dir: "build"
+                  output_ext: "*.uf2 *.elf *.elf.map"
 
             - name: Upload Build Artifacts
               uses: actions/upload-artifact@v4
