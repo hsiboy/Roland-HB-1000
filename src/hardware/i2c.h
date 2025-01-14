@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cstddef>  // for size_t
+#include "hardware/i2c.h"
 
 namespace pg1000 {
 namespace hardware {
