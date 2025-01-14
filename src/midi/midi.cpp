@@ -1,6 +1,7 @@
 #include "midi.h"
 #include "hardware/uart.h"
 #include "hardware/gpio.h"
+#include "hardware/irq.h"
 #include "pico/stdlib.h"
 
 namespace pg1000 {
@@ -12,6 +13,9 @@ bool MIDI::in_sysex = false;
 uint8_t MIDI::midi_channel = MIDI_CHANNEL;
 bool MIDI::sysex_enabled = true;
 bool MIDI::cc_enabled = true;
+
+// Forward declare the UART interrupt handler
+static void on_uart_rx();
 
 bool MIDI::init() {
     // Initialize UART for MIDI
@@ -28,6 +32,14 @@ bool MIDI::init() {
     sysex_buffer.reserve(MAX_SYSEX_SIZE);
     
     return true;
+}
+
+// UART interrupt handler implementation
+static void on_uart_rx() {
+    while (uart_is_readable(uart0)) {
+        uint8_t byte = uart_getc(uart0);
+        MIDI::process_incoming();
+    }
 }
 
 void MIDI::send_cc(uint8_t cc, uint8_t value) {
