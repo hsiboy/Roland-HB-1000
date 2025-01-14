@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>  // for size_t
 
 namespace pg1000 {
 namespace hardware {
