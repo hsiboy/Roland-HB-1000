@@ -64,6 +64,30 @@ The Roland D50 is a classic digital synthesizer from 1987. While powerful, its i
 - PORTA: 10 buttons (with internal pull-ups)
 - PORTB: 6 LEDs (with 330Ω current limiting resistors)
 
+```txt
+src/
+├── hardware/
+│   ├── adc.cpp         // MCP3008 handling
+│   ├── adc.h
+│   ├── gpio.cpp        // LED and button handling via MCP23017
+│   ├── gpio.h
+│   ├── display.cpp     // LCD control
+│   ├── display.h
+│   └── hardware.h      // Common hardware definitions
+├── midi/
+│   ├── midi.cpp        // MIDI message handling
+│   ├── midi.h
+│   ├── sysex.cpp       // SysEx specific handling
+│   └── sysex.h
+├── parameters/
+│   ├── parameters.cpp  // Parameter definitions and handling
+│   └── parameters.h
+├── ui/
+│   ├── interface.cpp   // User interface logic
+│   └── interface.h
+└── main.cpp            // Main program loop
+```
+
 ## Software Requirements
 
 ### Development Tools
