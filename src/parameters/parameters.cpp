@@ -1,5 +1,6 @@
 #include "parameters.h"
 #include <array>
+#include <cstddef>
 
 namespace pg1000 {
 
@@ -40,7 +41,7 @@ int get_parameter_count() {
 }
 
 const Parameter* get_parameter(int index) {
-    if (index >= 0 && index < PARAMETERS.size()) {
+    if (index >= 0 && static_cast<size_t>(index) < PARAMETERS.size()) {
         return &PARAMETERS[index];
     }
     return nullptr;
