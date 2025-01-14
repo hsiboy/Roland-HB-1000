@@ -87,6 +87,8 @@ private:
     static HardwareStatus last_error;
     
     // Internal helper functions
+    static bool detect_mcp3008(uint8_t chip_num);
+    static bool test_gpio_expander();
     static bool detect_devices();
     static void test_connections();
 };
