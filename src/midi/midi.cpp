@@ -1,4 +1,5 @@
 #include "midi.h"
+#include "sysex.h"
 #include "hardware/uart.h"
 #include "hardware/gpio.h"
 #include "hardware/irq.h"
