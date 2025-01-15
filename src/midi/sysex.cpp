@@ -131,9 +131,62 @@ bool SysEx::is_valid_message(const std::vector<uint8_t>& data) {
 SysExAddress SysEx::get_parameter_address(const Parameter* param) {
     if (!param) return SysExAddress();
 
-    // TODO: Calculate actual address based on parameter type and offset
-    // This needs to be implemented based on the full parameter mapping
-    return SysExAddress();
+    SysExAddress base_addr;
+    uint8_t offset = 0;
+
+    // First determine base address based on parameter group
+    switch (param->group) {
+        case ParamGroup::UPPER_PARTIAL_1:
+            base_addr = UPPER_PARTIAL_1;
+            offset = param->partial_offset;
+            break;
+
+        case ParamGroup::UPPER_PARTIAL_2:
+            base_addr = UPPER_PARTIAL_2;
+            offset = param->partial_offset;
+            break;
+
+        case ParamGroup::UPPER_COMMON:
+            base_addr = UPPER_COMMON;
+            offset = param->common_offset;
+            break;
+
+        case ParamGroup::LOWER_PARTIAL_1:
+            base_addr = LOWER_PARTIAL_1;
+            offset = param->partial_offset;
+            break;
+
+        case ParamGroup::LOWER_PARTIAL_2:
+            base_addr = LOWER_PARTIAL_2;
+            offset = param->partial_offset;
+            break;
+
+        case ParamGroup::LOWER_COMMON:
+            base_addr = LOWER_COMMON;
+            offset = param->common_offset;
+            break;
+
+        case ParamGroup::PATCH:
+            base_addr = PATCH;
+            offset = param->patch_offset;
+            break;
+
+        default:
+            return SysExAddress();
+    }
+
+    // Add offset to base address
+    // Since addresses are 3 bytes, we need to handle carries
+    uint16_t total = base_addr.lsb + offset;
+    uint8_t new_lsb = total & 0x7F;
+    uint8_t carry = (total >> 7) & 0x7F;
+
+    // Mid byte can carry to MSB if needed
+    uint16_t new_mid = base_addr.mid + carry;
+    uint8_t new_msb = base_addr.msb + (new_mid >> 7);
+    new_mid &= 0x7F;
+
+    return SysExAddress(new_msb, new_mid, new_lsb);
 }
 
 uint8_t SysEx::calculate_checksum(const std::vector<uint8_t>& data) {
