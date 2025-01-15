@@ -34,6 +34,16 @@ struct SysExAddress {
         : msb(m), mid(i), lsb(l) {}
 };
 
+// Base addresses for different sections
+static constexpr SysExAddress UPPER_PARTIAL_1{0x00, 0x00, 0x00};  // 0-53
+static constexpr SysExAddress UPPER_PARTIAL_2{0x00, 0x00, 0x40};  // 64-117
+static constexpr SysExAddress UPPER_COMMON{0x00, 0x01, 0x00};     // 128-175
+static constexpr SysExAddress LOWER_PARTIAL_1{0x00, 0x01, 0x40};  // 192-245
+static constexpr SysExAddress LOWER_PARTIAL_2{0x00, 0x02, 0x00};  // 256-309
+static constexpr SysExAddress LOWER_COMMON{0x00, 0x02, 0x40};     // 320-367
+static constexpr SysExAddress PATCH{0x00, 0x03, 0x00};            // 384-420
+static constexpr SysExAddress PATCH_WRITE{0x00, 0x20, 0x00};      // Patch write address
+
 class SysEx {
 public:
     // Create SysEx messages
@@ -55,16 +65,6 @@ public:
 
 private:
     static uint8_t midi_channel;  // Current MIDI channel (1-16)
-
-    // Base addresses for different sections
-    static constexpr SysExAddress UPPER_PARTIAL_1{0x00, 0x00, 0x00};  // 0-53
-    static constexpr SysExAddress UPPER_PARTIAL_2{0x00, 0x00, 0x40};  // 64-117
-    static constexpr SysExAddress UPPER_COMMON{0x00, 0x01, 0x00};     // 128-175
-    static constexpr SysExAddress LOWER_PARTIAL_1{0x00, 0x01, 0x40};  // 192-245
-    static constexpr SysExAddress LOWER_PARTIAL_2{0x00, 0x02, 0x00};  // 256-309
-    static constexpr SysExAddress LOWER_COMMON{0x00, 0x02, 0x40};     // 320-367
-    static constexpr SysExAddress PATCH{0x00, 0x03, 0x00};            // 384-420
-    static constexpr SysExAddress PATCH_WRITE{0x00, 0x20, 0x00};      // Patch write address
 
     // Internal helper functions
     static uint8_t get_device_id() { return static_cast<uint8_t>(midi_channel - 1); }
