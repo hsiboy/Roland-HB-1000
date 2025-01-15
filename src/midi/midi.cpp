@@ -58,18 +58,19 @@ void MIDI::send_cc(uint8_t cc, uint8_t value) {
 void MIDI::send_sysex(const Parameter* param) {
     if (!sysex_enabled || !param) return;
 
+    SysExAddress addr = SysEx::get_parameter_address(param);
     uint8_t sysex[] = {
         static_cast<uint8_t>(MessageType::SYSTEM_EXCLUSIVE),
-        ROLAND_ID,      // Roland ID
+        ROLAND_ID,
         0x10,          // Device ID
-        D50_ID,        // D50 ID
+        D50_ID,
         0x12,          // Command ID (DT1)
-        0x00,          // Address MSB
-        static_cast<uint8_t>((param->id >> 8) & 0xFF),  // Parameter ID MSB
-        static_cast<uint8_t>(param->id & 0xFF),         // Parameter ID LSB
-        param->value,   // Parameter value
-        0x00,          // Not used
-        0xF7           // End of SysEx
+        addr.msb,      // Address MSB
+        addr.mid,      // Address middle byte
+        addr.lsb,      // Address LSB
+        param->value,  // Parameter value
+        0x00,
+        0xF7
     };
     
     send_bytes(sysex, sizeof(sysex));
