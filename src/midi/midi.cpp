@@ -1,22 +1,24 @@
 #include "midi.h"
-#include "sysex.h"
 #include "hardware/uart.h"
 #include "hardware/gpio.h"
-#include "hardware/irq.h"
 #include "pico/stdlib.h"
 
 namespace pg1000 {
 namespace midi {
 
 // Static member initialization
-std::vector<uint8_t> MIDI::sysex_buffer;
-bool MIDI::in_sysex = false;
 uint8_t MIDI::midi_channel = MIDI_CHANNEL;
 bool MIDI::sysex_enabled = true;
 bool MIDI::cc_enabled = true;
+std::vector<uint8_t> MIDI::sysex_buffer;
+bool MIDI::in_sysex = false;
 
-// Forward declare the UART interrupt handler
-static void on_uart_rx();
+static void on_uart_rx() {
+    while (uart_is_readable(uart0)) {
+        uint8_t byte = uart_getc(uart0);
+        MIDI::process_incoming();
+    }
+}
 
 bool MIDI::init() {
     // Initialize UART for MIDI
@@ -35,22 +37,14 @@ bool MIDI::init() {
     return true;
 }
 
-// UART interrupt handler implementation
-static void on_uart_rx() {
-    while (uart_is_readable(uart0)) {
-        uint8_t byte = uart_getc(uart0);
-        MIDI::process_incoming();
-    }
-}
-
 void MIDI::send_cc(uint8_t cc, uint8_t value) {
     if (!cc_enabled) return;
 
     uint8_t status = static_cast<uint8_t>(MessageType::CONTROL_CHANGE) | (midi_channel - 1);
     uint8_t data[] = {
         status,
-        static_cast<uint8_t>(cc & 0x7F),        // CC number (0-127)
-        static_cast<uint8_t>(value & 0x7F)      // Value (0-127)
+        static_cast<uint8_t>(cc & 0x7F),
+        static_cast<uint8_t>(value & 0x7F)
     };
     
     send_bytes(data, sizeof(data));
@@ -87,7 +81,61 @@ void MIDI::send_program_change(uint8_t program) {
     send_bytes(data, sizeof(data));
 }
 
-// [Rest of the implementation remains the same]
+void MIDI::process_incoming() {
+    while (uart_is_readable(uart0)) {
+        uint8_t byte = uart_getc(uart0);
+        
+        // Handle SysEx
+        if (byte == static_cast<uint8_t>(MessageType::SYSTEM_EXCLUSIVE)) {
+            sysex_buffer.clear();
+            sysex_buffer.push_back(byte);
+            in_sysex = true;
+            continue;
+        }
+        
+        // Process SysEx data
+        if (in_sysex) {
+            sysex_buffer.push_back(byte);
+            
+            // Check for end of SysEx
+            if (byte == 0xF7) {
+                in_sysex = false;
+                handle_sysex();
+            }
+            
+            // Check for buffer overflow
+            if (sysex_buffer.size() >= MAX_SYSEX_SIZE) {
+                in_sysex = false;
+                sysex_buffer.clear();
+            }
+            continue;
+        }
+    }
+}
+
+void MIDI::send_bytes(const uint8_t* data, size_t length) {
+    for (size_t i = 0; i < length; i++) {
+        uart_putc(uart0, data[i]);
+    }
+}
+
+void MIDI::handle_sysex() {
+    if (sysex_buffer.size() < 11) return;  // Minimum size for D50 message
+    
+    // Verify Roland message
+    if (sysex_buffer[1] != ROLAND_ID || 
+        sysex_buffer[3] != D50_ID) return;
+        
+    // Process message based on command
+    switch (sysex_buffer[4]) {
+        case 0x11:  // RQ1 - Data request
+            break;
+            
+        case 0x12:  // DT1 - Data set
+            // TODO: Update parameter based on address
+            break;
+    }
+}
 
 } // namespace midi
 } // namespace pg1000
