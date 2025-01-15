@@ -19,6 +19,7 @@ add_executable(roland_pg1000
     src/midi/midi.cpp
     src/midi/sysex.cpp
     src/parameters/parameters.cpp
+    src/ui/interface.cpp
 )
 
 # Add pico_stdlib library which aggregates commonly used features
