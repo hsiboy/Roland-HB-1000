@@ -4,33 +4,83 @@
 
 namespace pg1000 {
 
-// D50 Parameter Definitions
-static const std::array<Parameter, 34> PARAMETERS = {{
-    // COMMON parameters
-    {0x0319, 0, 0, ParamType::CONTINUOUS_100, 100, 0, ParamGroup::COMMON, "DCO-1 Fine Tune", false, 3},
-    {0x0318, 0, 0, ParamType::CONTINUOUS_100, 100, 1, ParamGroup::COMMON, "DCO-1 Coarse", false, 9},
-    {0x0321, 0, 0, ParamType::CONTINUOUS_100, 100, 2, ParamGroup::COMMON, "DCO-2 Fine Tune", false, 14},
-    {0x031C, 0, 0, ParamType::CONTINUOUS_100, 100, 3, ParamGroup::COMMON, "DCO-2 Coarse", false, 15},
-    {0x0323, 0, 0, ParamType::CONTINUOUS_100, 100, 4, ParamGroup::COMMON, "DCO Balance", false, 20},
-    {0x0324, 0, 0, ParamType::CONTINUOUS_100, 100, 5, ParamGroup::COMMON, "DCO Mix", false, 21},
-    {0x012F, 0, 0, ParamType::CONTINUOUS_100, 100, 6, ParamGroup::COMMON, "Chorus Rate", false, 22},
-    {0x0116, 0, 0, ParamType::CONTINUOUS_100, 100, 7, ParamGroup::COMMON, "Chorus Depth", false, 23},
-    {0x0117, 0, 0, ParamType::CONTINUOUS_100, 100, 8, ParamGroup::COMMON, "Chorus Balance", false, 24},
-    {0x0118, 0, 0, ParamType::CONTINUOUS_100, 100, 9, ParamGroup::COMMON, "Output Level", false, 25},
+static const std::array<Parameter, 56> PARAMETERS = {{
 
-    // TVF parameters
-    {0x011A, 0, 0, ParamType::CONTINUOUS_100, 100, 10, ParamGroup::COMMON, "TVF Cutoff", false, 26},
-    {0x011B, 0, 0, ParamType::CONTINUOUS_100, 100, 11, ParamGroup::COMMON, "TVF Resonance", false, 27},
-    {0x011E, 0, 0, ParamType::CONTINUOUS_100, 100, 12, ParamGroup::COMMON, "TVF Key Follow", false, 28},
-    {0x011F, 0, 0, ParamType::CONTINUOUS_100, 100, 13, ParamGroup::COMMON, "TVF Env Depth", false, 29},
+// format of parameters is as follows:
+// {
+//        "WG Pitch Coarse",           // name
+//        ParamGroup::UPPER_PARTIAL_1, // group
+//        ParamType::CONTINUOUS_100,   // type
+//        {.partial_offset = 0},       // offset
+//        0,                           // current value
+//        0,                           // previous value
+//        0,                           // min value
+//        72,                          // max value (C1-C7)
+//        0,                           // pot number
+//        false                        // active
+//    },
 
-    // Time parameters (0-50 range)
-    {0x010D, 0, 0, ParamType::CONTINUOUS_50, 50, 14, ParamGroup::COMMON, "T1", false, 30},
-    {0x010E, 0, 0, ParamType::CONTINUOUS_50, 50, 15, ParamGroup::COMMON, "T2", false, 31},
-    {0x010F, 0, 0, ParamType::CONTINUOUS_50, 50, 16, ParamGroup::COMMON, "T3", false, 85},
-    {0x0110, 0, 0, ParamType::CONTINUOUS_50, 50, 17, ParamGroup::COMMON, "T4", false, 86},
-    
-    // Add more parameters...
+    // Wave Generator (WG) Parameters - Upper Partial 1
+    {"WG Pitch Coarse", ParamGroup::UPPER_PARTIAL_1, ParamType::CONTINUOUS_100, {0}, 0, 0, 0, 72, 0, true},
+    {"WG Pitch Fine", ParamGroup::UPPER_PARTIAL_1, ParamType::CONTINUOUS_100, {1}, 0, 0, 0, 100, 1, true},
+    {"WG Pitch Keyfollow", ParamGroup::UPPER_PARTIAL_1, ParamType::KEYFOLLOW, {2}, 0, 0, 0, 16, 2, true},
+    {"WG Mod LFO Mode", ParamGroup::UPPER_PARTIAL_1, ParamType::ENUM, {3}, 0, 0, 0, 3, 3, true},
+    {"WG Mod P-ENV Mode", ParamGroup::UPPER_PARTIAL_1, ParamType::ENUM, {4}, 0, 0, 0, 2, 4, true},
+    {"WG Mod Bender Mode", ParamGroup::UPPER_PARTIAL_1, ParamType::ENUM, {5}, 0, 0, 0, 2, 5, true},
+    {"WG Waveform", ParamGroup::UPPER_PARTIAL_1, ParamType::ENUM, {6}, 0, 0, 0, 1, 6, true},
+    {"WG PCM Wave No.", ParamGroup::UPPER_PARTIAL_1, ParamType::CONTINUOUS_100, {7}, 0, 0, 0, 99, 7, true},
+    {"WG Pulse Width", ParamGroup::UPPER_PARTIAL_1, ParamType::CONTINUOUS_100, {8}, 0, 0, 0, 100, 8, true},
+    {"WG PW Velocity Range", ParamGroup::UPPER_PARTIAL_1, ParamType::CONTINUOUS_100, {9}, 0, 0, 0, 14, 9, true},
+
+    // Time Variant Filter (TVF) Parameters
+    {"TVF Cutoff Freq", ParamGroup::UPPER_PARTIAL_1, ParamType::CONTINUOUS_100, {13}, 0, 0, 0, 100, 10, true},
+    {"TVF Resonance", ParamGroup::UPPER_PARTIAL_1, ParamType::CONTINUOUS_100, {14}, 0, 0, 0, 30, 11, true},
+    {"TVF Keyfollow", ParamGroup::UPPER_PARTIAL_1, ParamType::KEYFOLLOW, {15}, 0, 0, 0, 14, 12, true},
+    {"TVF Bias Point/Dir", ParamGroup::UPPER_PARTIAL_1, ParamType::CONTINUOUS_100, {16}, 0, 0, 0, 127, 13, true},
+    {"TVF Bias Level", ParamGroup::UPPER_PARTIAL_1, ParamType::CONTINUOUS_100, {17}, 0, 0, -7, 7, 14, true},
+    {"TVF ENV Depth", ParamGroup::UPPER_PARTIAL_1, ParamType::CONTINUOUS_100, {18}, 0, 0, 0, 100, 15, true},
+
+    // Time Variant Amplifier (TVA) Parameters
+    {"TVA Level", ParamGroup::UPPER_PARTIAL_1, ParamType::CONTINUOUS_100, {35}, 0, 0, 0, 100, 16, true},
+    {"TVA Velocity Range", ParamGroup::UPPER_PARTIAL_1, ParamType::CONTINUOUS_100, {36}, 0, 0, -50, 50, 17, true},
+    {"TVA Bias Point Dir", ParamGroup::UPPER_PARTIAL_1, ParamType::CONTINUOUS_100, {37}, 0, 0, 0, 127, 18, true},
+    {"TVA Bias Level", ParamGroup::UPPER_PARTIAL_1, ParamType::CONTINUOUS_100, {38}, 0, 0, -12, 0, 19, true},
+
+    // Common Parameters
+    {"Structure", ParamGroup::COMMON, ParamType::ENUM, {10}, 0, 0, 0, 6, 20, true},
+    {"P-ENV Velocity Range", ParamGroup::COMMON, ParamType::CONTINUOUS_100, {11}, 0, 0, 0, 2, 21, true},
+    {"P-ENV Time Keyfollow", ParamGroup::COMMON, ParamType::KEYFOLLOW, {12}, 0, 0, 0, 4, 22, true},
+    {"P-ENV Time 1", ParamGroup::COMMON, ParamType::CONTINUOUS_50, {13}, 0, 0, 0, 50, 23, true},
+    {"P-ENV Time 2", ParamGroup::COMMON, ParamType::CONTINUOUS_50, {14}, 0, 0, 0, 50, 24, true},
+    {"P-ENV Time 3", ParamGroup::COMMON, ParamType::CONTINUOUS_50, {15}, 0, 0, 0, 50, 25, true},
+    {"P-ENV Time 4", ParamGroup::COMMON, ParamType::CONTINUOUS_50, {16}, 0, 0, 0, 50, 26, true},
+
+    // LFO Parameters
+    {"LFO-1 Waveform", ParamGroup::COMMON, ParamType::ENUM, {25}, 0, 0, 0, 3, 27, true},
+    {"LFO-1 Rate", ParamGroup::COMMON, ParamType::CONTINUOUS_100, {26}, 0, 0, 0, 100, 28, true},
+    {"LFO-1 Delay Time", ParamGroup::COMMON, ParamType::CONTINUOUS_100, {27}, 0, 0, 0, 100, 29, true},
+    {"LFO-1 Sync", ParamGroup::COMMON, ParamType::ENUM, {28}, 0, 0, 0, 2, 30, true},
+
+    // EQ Parameters
+    {"Low EQ Freq", ParamGroup::COMMON, ParamType::ENUM, {37}, 0, 0, 0, 15, 31, true},
+    {"Low EQ Gain", ParamGroup::COMMON, ParamType::CONTINUOUS_100, {38}, 0, 0, -12, 12, 32, true},
+    {"High EQ Freq", ParamGroup::COMMON, ParamType::ENUM, {39}, 0, 0, 0, 21, 33, true},
+    {"High EQ Q", ParamGroup::COMMON, ParamType::ENUM, {40}, 0, 0, 0, 8, 34, true},
+    {"High EQ Gain", ParamGroup::COMMON, ParamType::CONTINUOUS_100, {41}, 0, 0, -12, 12, 35, true},
+
+    // Chorus Parameters
+    {"Chorus Type", ParamGroup::COMMON, ParamType::ENUM, {42}, 0, 0, 1, 8, 36, true},
+    {"Chorus Rate", ParamGroup::COMMON, ParamType::CONTINUOUS_100, {43}, 0, 0, 0, 100, 37, true},
+    {"Chorus Depth", ParamGroup::COMMON, ParamType::CONTINUOUS_100, {44}, 0, 0, 0, 100, 38, true},
+    {"Chorus Balance", ParamGroup::COMMON, ParamType::CONTINUOUS_100, {45}, 0, 0, 0, 100, 39, true},
+
+    // Patch Parameters
+    {"Portamento Mode", ParamGroup::PATCH, ParamType::ENUM, {20}, 0, 0, 0, 2, 40, true},
+    {"Hold Mode", ParamGroup::PATCH, ParamType::ENUM, {21}, 0, 0, 0, 2, 41, true},
+    {"Upper Key Shift", ParamGroup::PATCH, ParamType::CONTINUOUS_100, {22}, 0, 0, -24, 24, 42, true},
+    {"Lower Key Shift", ParamGroup::PATCH, ParamType::CONTINUOUS_100, {23}, 0, 0, -24, 24, 43, true},
+    {"Upper Fine Tune", ParamGroup::PATCH, ParamType::CONTINUOUS_100, {24}, 0, 0, -50, 50, 44, true},
+    {"Lower Fine Tune", ParamGroup::PATCH, ParamType::CONTINUOUS_100, {25}, 0, 0, -50, 50, 45, true}
 }};
 
 // Parameter state storage
@@ -41,17 +91,8 @@ int get_parameter_count() {
 }
 
 const Parameter* get_parameter(int index) {
-    if (index >= 0 && static_cast<size_t>(index) < PARAMETERS.size()) {
+    if (index >= 0 && index < static_cast<int>(PARAMETERS.size())) {
         return &PARAMETERS[index];
-    }
-    return nullptr;
-}
-
-const Parameter* get_parameter_by_id(uint16_t id) {
-    for (const auto& param : PARAMETERS) {
-        if (param.id == id) {
-            return &param;
-        }
     }
     return nullptr;
 }
