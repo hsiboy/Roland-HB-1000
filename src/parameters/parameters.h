@@ -5,24 +5,29 @@
 
 namespace pg1000 {
 
+
 enum class ParamType {
-    CONTINUOUS_100,  // 0-100 range parameters
-    CONTINUOUS_50,   // 0-50 range parameters
-    SWITCH,         // On/Off or small range switches
-    KEYFOLLOW,      // Keyfollow parameters
-    ENUM           // Enumerated values (like waveforms)
+   CONTINUOUS_100,  // 0-100 range (standard params)
+   CONTINUOUS_50,   // 0-50 range (time params)
+   KEYFOLLOW,      // Keyfollow rates (-1, -1/2, -4/1, etc)
+   ENUM,           // Fixed value choices (waveforms etc)
+   BIPOLAR_50,     // -50 to +50 range
+   BIPOLAR_24,     // -24 to +24 (key shift)
+   BIPOLAR_12,     // -12 to +12 (EQ gain)
+   BIPOLAR_7       // -7 to +7 (bias levels)
 };
 
 enum class ParamGroup {
-    COMMON,         // Common parameters
-    UPPER_PARTIAL_1,
-    UPPER_PARTIAL_2,
-    UPPER_COMMON,
-    LOWER_PARTIAL_1,
-    LOWER_PARTIAL_2,
-    LOWER_COMMON,
-    PATCH
+   UPPER_PARTIAL_1,  // Base addr: 00-00-00
+   UPPER_PARTIAL_2,  // Base addr: 00-00-40  
+   UPPER_COMMON,     // Base addr: 00-01-00
+   LOWER_PARTIAL_1,  // Base addr: 00-01-40
+   LOWER_PARTIAL_2,  // Base addr: 00-02-00
+   LOWER_COMMON,     // Base addr: 00-02-40
+   PATCH,           // Base addr: 00-03-00
+   COMMON           // Shared settings
 };
+
 
 // Parameter definition
 struct Parameter {
