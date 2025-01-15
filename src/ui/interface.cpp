@@ -2,6 +2,7 @@
 #include "../hardware/display.h"
 #include "../hardware/gpio.h"
 #include "../midi/midi.h"
+#include <cstdio>
 #include "pico/time.h"
 
 namespace pg1000 {
@@ -15,19 +16,14 @@ uint32_t Interface::last_button_time = 0;
 bool Interface::display_needs_update = true;
 
 bool Interface::init() {
-    // Set initial parameter to first available
     current_parameter = get_parameter(0);
-    
-    // Initialize display with welcome screen
     hardware::Display::show_message("D50 Controller", "Initializing...");
-    
     return true;
 }
 
 void Interface::update() {
     uint32_t now = time_us_32();
     
-    // Update based on current mode
     switch (current_mode) {
         case Mode::NORMAL:
             update_normal_mode();
@@ -43,22 +39,8 @@ void Interface::update() {
             break;
     }
     
-    // Update display if needed
     if (display_needs_update) {
-        switch (current_mode) {
-            case Mode::NORMAL:
-                update_normal_display();
-                break;
-            case Mode::MENU:
-                update_menu_display();
-                break;
-            case Mode::PARAMETER_EDIT:
-                update_parameter_edit_display();
-                break;
-            case Mode::SYSTEM_CONFIG:
-                update_system_config_display();
-                break;
-        }
+        update_display();
         display_needs_update = false;
     }
 }
@@ -66,19 +48,18 @@ void Interface::update() {
 void Interface::handle_button_press(uint8_t button) {
     last_button_time = time_us_32();
     
-    // Map buttons based on current mode
     switch (current_mode) {
         case Mode::NORMAL:
-            map_normal_mode_buttons();
+            map_normal_mode_buttons(button);
             break;
         case Mode::MENU:
-            map_menu_mode_buttons();
+            map_menu_mode_buttons(button);
             break;
         case Mode::PARAMETER_EDIT:
-            map_parameter_edit_buttons();
+            map_parameter_edit_buttons(button);
             break;
         case Mode::SYSTEM_CONFIG:
-            map_system_config_buttons();
+            map_system_config_buttons(button);
             break;
     }
     
@@ -90,11 +71,10 @@ void Interface::set_mode(Mode mode) {
         current_mode = mode;
         display_needs_update = true;
         
-        // Update LEDs based on mode
         switch (mode) {
             case Mode::NORMAL:
-                hardware::GPIO::set_led(0, hardware::LedState::ON);  // UPPER LED
-                hardware::GPIO::set_led(1, hardware::LedState::OFF); // LOWER LED
+                hardware::GPIO::set_led(0, hardware::LedState::ON);
+                hardware::GPIO::set_led(1, hardware::LedState::OFF);
                 break;
             case Mode::MENU:
                 hardware::GPIO::set_led(0, hardware::LedState::BLINK_SLOW);
@@ -110,41 +90,9 @@ void Interface::set_mode(Mode mode) {
     }
 }
 
-void Interface::update_normal_mode() {
-    // Check potentiometer changes
-    // This is handled in main.cpp through ADC readings
-    
-    // Check long-press for menu entry
-    if (hardware::GPIO::get_button(4) && // MENU button
-        (time_us_32() - last_button_time > 1000000)) { // 1 second
-        set_mode(Mode::MENU);
-    }
-}
-
-void Interface::update_menu_mode() {
-    // Menu navigation handled by button mapping
-}
-
-void Interface::update_parameter_edit_mode() {
-    if (!current_parameter) {
-        set_mode(Mode::NORMAL);
-        return;
-    }
-    
-    // Check for value increment/decrement buttons
-    if (hardware::GPIO::get_button(5)) { // INC button
-        update_parameter_value(1);
-    }
-    if (hardware::GPIO::get_button(6)) { // DEC button
-        update_parameter_value(-1);
-    }
-}
-
-void Interface::update_system_config_mode() {
-    // System configuration handled by button mapping
-}
-
 void Interface::next_parameter() {
+    if (!current_parameter) return;
+    
     int current_idx = 0;
     for (int i = 0; i < get_parameter_count(); i++) {
         if (get_parameter(i) == current_parameter) {
@@ -159,6 +107,8 @@ void Interface::next_parameter() {
 }
 
 void Interface::prev_parameter() {
+    if (!current_parameter) return;
+    
     int current_idx = 0;
     for (int i = 0; i < get_parameter_count(); i++) {
         if (get_parameter(i) == current_parameter) {
@@ -176,15 +126,63 @@ void Interface::update_parameter_value(int16_t change) {
     if (!current_parameter) return;
     
     int16_t new_value = current_parameter->value + change;
-    new_value = std::max(0, std::min(static_cast<int16_t>(current_parameter->max_value), new_value));
+    new_value = std::max<int16_t>(0, std::min<int16_t>(current_parameter->max_value, new_value));
     
-    // Update parameter
     update_parameter_value(current_parameter, static_cast<uint8_t>(new_value));
     display_needs_update = true;
 }
 
-void Interface::refresh_display() {
+void Interface::update_parameter_value(const Parameter* param, uint8_t value) {
+    if (!param) return;
+    const_cast<Parameter*>(param)->value = value;
+    midi::MIDI::send_sysex(param);
     display_needs_update = true;
+}
+
+void Interface::update_normal_mode() {
+    if (hardware::GPIO::get_button(4) && 
+        (time_us_32() - last_button_time > 1000000)) {
+        set_mode(Mode::MENU);
+    }
+}
+
+void Interface::update_menu_mode() {
+    // Menu navigation handled by button mapping
+}
+
+void Interface::update_parameter_edit_mode() {
+    if (!current_parameter) {
+        set_mode(Mode::NORMAL);
+        return;
+    }
+    
+    if (hardware::GPIO::get_button(5)) {  // INC button
+        update_parameter_value(1);
+    }
+    if (hardware::GPIO::get_button(6)) {  // DEC button
+        update_parameter_value(-1);
+    }
+}
+
+void Interface::update_system_config_mode() {
+    // System configuration handled by button mapping
+}
+
+void Interface::update_display() {
+    switch (current_mode) {
+        case Mode::NORMAL:
+            update_normal_display();
+            break;
+        case Mode::MENU:
+            update_menu_display();
+            break;
+        case Mode::PARAMETER_EDIT:
+            update_parameter_edit_display();
+            break;
+        case Mode::SYSTEM_CONFIG:
+            update_system_config_display();
+            break;
+    }
 }
 
 void Interface::update_normal_display() {
@@ -203,9 +201,6 @@ void Interface::update_menu_display() {
         case MenuItem::MIDI_CHANNEL:
             menu_text = "MIDI Channel";
             break;
-        case MenuItem::SYSEX_ENABLE:
-            menu_text = "SysEx Enable";
-            break;
         // Add other menu items
     }
     hardware::Display::show_message("MENU", menu_text);
@@ -223,42 +218,50 @@ void Interface::update_system_config_display() {
     hardware::Display::show_message("System Config", "");
 }
 
-// Button mapping implementations
-void Interface::map_normal_mode_buttons() {
-    if (hardware::GPIO::get_button_pressed(0)) { // UPPER
-        // Handle UPPER button
-    }
-    if (hardware::GPIO::get_button_pressed(1)) { // LOWER
-        // Handle LOWER button
-    }
-    // Map other buttons
-}
-
-void Interface::map_menu_mode_buttons() {
-    if (hardware::GPIO::get_button_pressed(7)) { // ENTER
-        execute_menu_item();
-    }
-    if (hardware::GPIO::get_button_pressed(8)) { // EXIT
-        set_mode(Mode::NORMAL);
-    }
-    if (hardware::GPIO::get_button_pressed(5)) { // INC
-        next_menu_item();
-    }
-    if (hardware::GPIO::get_button_pressed(6)) { // DEC
-        prev_menu_item();
+void Interface::map_normal_mode_buttons(uint8_t button) {
+    switch (button) {
+        case 0:  // UPPER
+            break;
+        case 1:  // LOWER
+            break;
+        case 5:  // INC
+            next_parameter();
+            break;
+        case 6:  // DEC
+            prev_parameter();
+            break;
+        case 7:  // ENTER
+            set_mode(Mode::PARAMETER_EDIT);
+            break;
     }
 }
 
-void Interface::map_parameter_edit_buttons() {
-    if (hardware::GPIO::get_button_pressed(8)) { // EXIT
+void Interface::map_menu_mode_buttons(uint8_t button) {
+    switch (button) {
+        case 7:  // ENTER
+            execute_menu_item();
+            break;
+        case 8:  // EXIT
+            set_mode(Mode::NORMAL);
+            break;
+    }
+}
+
+void Interface::map_parameter_edit_buttons(uint8_t button) {
+    if (button == 8) {  // EXIT
         set_mode(Mode::NORMAL);
     }
 }
 
-void Interface::map_system_config_buttons() {
-    if (hardware::GPIO::get_button_pressed(8)) { // EXIT
+void Interface::map_system_config_buttons(uint8_t button) {
+    if (button == 8) {  // EXIT
         set_mode(Mode::NORMAL);
     }
+}
+
+void Interface::execute_menu_item() {
+    // Implement menu actions
+    set_mode(Mode::NORMAL);
 }
 
 } // namespace ui
