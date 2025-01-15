@@ -30,6 +30,7 @@ enum class ParamGroup {
 
 
 // Parameter definition
+
 struct Parameter {
     const char* name;           // Parameter name
     ParamGroup group;          // Which section this belongs to
@@ -41,8 +42,8 @@ struct Parameter {
     };
     uint8_t value;            // Current value
     uint8_t prev_value;       // Previous value
-    uint8_t min_value;        // Minimum allowed value
-    uint8_t max_value;        // Maximum allowed value
+    int8_t min_value;        // Minimum allowed value
+    int8_t max_value;        // Maximum allowed value
     uint8_t pot_number;       // Which potentiometer controls this
     bool active;             // Is this parameter currently active?
 };
