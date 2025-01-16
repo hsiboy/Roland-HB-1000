@@ -94,6 +94,7 @@ private:
     // Helper functions
     static MidiError send_bytes(const uint8_t* data, size_t length);
     static void handle_sysex();
+    static void handle_realtime_message(MessageType message);
     static uint8_t calculate_checksum(const uint8_t* data, size_t length);
     static bool verify_checksum(const std::vector<uint8_t>& message);
     static bool should_update_parameter(uint8_t parameter_index);

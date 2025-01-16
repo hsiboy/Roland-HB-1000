@@ -1,7 +1,6 @@
 #include "midi.h"
-#include "hardware/uart.h"
-#include "hardware/gpio.h"
-#include "pico/stdlib.h"
+#include "../hardware/hardware.h"
+#include "../hardware/gpio.h"
 
 namespace pg1000 {
 namespace midi {
@@ -89,10 +88,10 @@ MidiError MIDI::send_sysex(const Parameter* param) {
     SysExAddress addr = SysEx::get_parameter_address(param);
     
     // Apply value smoothing
-    uint16_t smoothed_value = parameter_smoothers[param->id].update(param->value);
+    uint16_t smoothed_value = parameter_smoothers[param->pot_number].update(param->value);
     
     // Check if we should send an update
-    if (!should_update_parameter(param->id)) {
+    if (!should_update_parameter(param->pot_number)) {
         return MidiError::OK;
     }
 
@@ -271,6 +270,32 @@ bool MIDI::verify_checksum(const std::vector<uint8_t>& message) {
     
     sum = (sum + message[data_end]) & 0x7F;  // Add checksum
     return sum == 0;  // Valid checksum should result in 0
+}
+
+void MIDI::handle_realtime_message(MessageType message) {
+    switch (message) {
+        case MessageType::TIMING_CLOCK:
+            // Handle MIDI clock pulse (24 ppq)
+            break;
+        case MessageType::START:
+            // Handle MIDI start message
+            break;
+        case MessageType::CONTINUE:
+            // Handle MIDI continue message
+            break;
+        case MessageType::STOP:
+            // Handle MIDI stop message
+            break;
+        case MessageType::ACTIVE_SENSING:
+            // Handle MIDI active sensing message
+            break;
+        case MessageType::SYSTEM_RESET:
+            // Handle MIDI system reset message
+            break;
+        default:
+            // Ignore other message types
+            break;
+    }
 }
 
 bool MIDI::should_update_parameter(uint8_t parameter_index) {

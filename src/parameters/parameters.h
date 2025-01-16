@@ -35,6 +35,7 @@ struct Parameter {
     const char* name;           // Parameter name
     ParamGroup group;          // Which section this belongs to
     ParamType type;           // Parameter type
+    uint8_t id;              // Unique parameter identifier
     union {
         uint8_t partial_offset; // Offset for partial parameters (WG, TVF, TVA)
         uint8_t common_offset;  // Offset for common parameters

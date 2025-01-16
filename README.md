@@ -6,6 +6,12 @@ A DIY hardware controller for the Roland D50 synthesizer, providing hands-on con
 
 The Roland D50 is a classic digital synthesizer from 1987. While powerful, its interface relies heavily on menu diving for parameter adjustments. Roland released the PG-1000 programmer unit to provide direct hardware control, but these are now rare and often sell for more than the D50 itself ($500+). While commercial alternatives exist (around $400+), this project provides a maker-friendly solution at a significantly lower cost.
 
+## Current Status
+
+At the time of writting this (January 2025) this projetc is very much a work in progress. I'm fleshing out the code daily. Therefore there is a good chance that this code doesnt even currently build.
+
+Current Build Status: ![example workflow](https://github.com/hsiboy/Roland-HB-1000/actions/workflows/c-cpp.yml/badge.svg)
+
 ## Features
 
 - 56 potentiometers for direct parameter control
