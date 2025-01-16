@@ -1,7 +1,7 @@
 #pragma once
 
-#include <array>
-#include <cstdint>
+#include "pico/stdlib.h"
+#include "pico/platform.h"
 
 namespace pg1000 {
 namespace hardware {
