@@ -44,9 +44,12 @@ public:
     static void process_incoming();
     
     // Configuration
-    static void set_midi_channel(uint8_t channel) { midi_channel = channel; }
     static void enable_sysex(bool enable) { sysex_enabled = enable; }
     static void enable_cc(bool enable) { cc_enabled = enable; }
+
+    // MIDI channel access
+    static void set_midi_channel(uint8_t channel) { midi_channel = channel; }
+    static uint8_t get_midi_channel() { return midi_channel; }
 
 private:
     static uint8_t midi_channel;

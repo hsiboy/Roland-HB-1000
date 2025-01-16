@@ -11,7 +11,8 @@ enum class Mode {
     NORMAL,         // Normal operation mode
     MENU,           // Menu navigation
     PARAMETER_EDIT, // Direct parameter value editing
-    SYSTEM_CONFIG   // System configuration
+    SYSTEM_CONFIG,  // System configuration
+    MIDI_CHANNEL_SELECT  // New mode for MIDI channel selection
 };
 
 // Menu Items
@@ -61,6 +62,11 @@ private:
    static uint32_t last_button_time;
    static bool display_needs_update;
 
+    // MIDI Channel selection mode functions
+    static void update_midi_channel_mode();
+    static void update_midi_channel_display();
+    static void map_midi_channel_buttons(uint8_t button);
+
    // Display functions
    static void update_display();
    static void update_normal_display();
@@ -86,6 +92,12 @@ private:
    static void map_menu_mode_buttons(uint8_t button);
    static void map_parameter_edit_buttons(uint8_t button);
    static void map_system_config_buttons(uint8_t button);
+
+    // Parameter access control
+    static bool can_edit_parameter(const Parameter* param);
+    static bool is_common_parameter(ParamGroup group);
+    static bool is_upper_common(ParamGroup group) { return group == ParamGroup::UPPER_COMMON; }
+    static bool is_lower_common(ParamGroup group) { return group == ParamGroup::LOWER_COMMON; }
 };
 
 } // namespace ui

@@ -2,30 +2,31 @@
 #include "hardware/i2c.h"
 #include "pico/time.h"
 #include "hardware/gpio.h"  // for GPIO_FUNC_I2C
+
 namespace pg1000 {
 namespace hardware {
 
 // Static member initialization
 std::array<GPIO::Button, GPIO::NUM_BUTTONS> GPIO::buttons = {{
-    {0, false, false, 0, "UPPER"},
-    {1, false, false, 0, "LOWER"},
-    {2, false, false, 0, "PARTIAL"},
-    {3, false, false, 0, "WRITE"},
-    {4, false, false, 0, "MODE"},
-    {5, false, false, 0, "INC"},
-    {6, false, false, 0, "DEC"},
-    {7, false, false, 0, "ENTER"},
-    {8, false, false, 0, "EXIT"},
-    {9, false, false, 0, "MENU"}
+    {0, false, false, 0, "COMMON_UPPER"},     // Common Upper selector
+    {1, false, false, 0, "COMMON_LOWER"},     // Common Lower selector
+    {2, false, false, 0, "PARTIAL_UP1"},      // Upper Partial 1
+    {3, false, false, 0, "PARTIAL_UP2"},      // Upper Partial 2
+    {4, false, false, 0, "PARTIAL_LOW1"},     // Lower Partial 1
+    {5, false, false, 0, "PARTIAL_LOW2"},     // Lower Partial 2
+    {6, false, false, 0, "MIDI_CHANNEL"},     // MIDI Channel button
+    {7, false, false, 0, "MANUAL"},           // Manual Mode button
+    {8, false, false, 0, "PARAM_REQ"},        // Parameter Request
+    {9, false, false, 0, "PREV_VALUE"}        // Previous Value comparison
 }};
 
 std::array<GPIO::Led, GPIO::NUM_LEDS> GPIO::leds = {{
-    {0, LedState::OFF, 0, "UPPER"},
-    {1, LedState::OFF, 0, "LOWER"},
-    {2, LedState::OFF, 0, "PARTIAL"},
-    {3, LedState::OFF, 0, "MIDI"},
-    {4, LedState::OFF, 0, "WRITE"},
-    {5, LedState::OFF, 0, "ERROR"}
+    {0, LedState::OFF, 0, "COMMON_UPPER"},    // Common Upper LED
+    {1, LedState::OFF, 0, "COMMON_LOWER"},    // Common Lower LED
+    {2, LedState::OFF, 0, "PARTIAL_UP1"},     // Upper Partial 1 LED
+    {3, LedState::OFF, 0, "PARTIAL_UP2"},     // Upper Partial 2 LED
+    {4, LedState::OFF, 0, "PARTIAL_LOW1"},    // Lower Partial 1 LED
+    {5, LedState::OFF, 0, "PARTIAL_LOW2"}     // Lower Partial 2 LED
 }};
 
 bool GPIO::init() {

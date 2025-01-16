@@ -44,6 +44,26 @@ public:
     static bool get_button(uint8_t button);
     static bool get_button_pressed(uint8_t button);  // Returns true on press event
 
+    // Button indices
+    static constexpr uint8_t BTN_COMMON_UPPER = 0;
+    static constexpr uint8_t BTN_COMMON_LOWER = 1;
+    static constexpr uint8_t BTN_PARTIAL_UP1 = 2;
+    static constexpr uint8_t BTN_PARTIAL_UP2 = 3;
+    static constexpr uint8_t BTN_PARTIAL_LOW1 = 4;
+    static constexpr uint8_t BTN_PARTIAL_LOW2 = 5;
+    static constexpr uint8_t BTN_MIDI_CHANNEL = 6;
+    static constexpr uint8_t BTN_MANUAL = 7;
+    static constexpr uint8_t BTN_PARAM_REQ = 8;
+    static constexpr uint8_t BTN_PREV_VALUE = 9;
+
+    // LED indices
+    static constexpr uint8_t LED_COMMON_UPPER = 0;
+    static constexpr uint8_t LED_COMMON_LOWER = 1;
+    static constexpr uint8_t LED_PARTIAL_UP1 = 2;
+    static constexpr uint8_t LED_PARTIAL_UP2 = 3;
+    static constexpr uint8_t LED_PARTIAL_LOW1 = 4;
+    static constexpr uint8_t LED_PARTIAL_LOW2 = 5;
+
     // Update function (handles debouncing and LED blinking)
     static void update();
 

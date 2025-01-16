@@ -6,6 +6,7 @@
 #include "hardware/adc.h"
 #include "midi/midi.h"
 #include "parameters/parameters.h"
+#include "parameters/common_selector.h"
 #include "ui/interface.h"
 
 using namespace pg1000;
@@ -30,6 +31,9 @@ int main() {
         return -1;
     }
 
+    // Initialize Common Parameter Selection
+    parameters::CommonSelector::init();  // Add this
+
     // Initialize UI
     if (!ui::Interface::init()) {
         printf("UI initialization failed\n");
@@ -41,11 +45,14 @@ int main() {
     // Main loop
     while (true) {
         // Update hardware state
-        hardware::ADC::read_all();  // Read all potentiometers
-        hardware::GPIO::update();    // Update button states and LEDs
+        hardware::ADC::read_all();      // Read all potentiometers
+        hardware::GPIO::update();        // Update button states and LEDs
+        
+        // Update parameter selection
+        parameters::CommonSelector::update();  // Add this - after GPIO update but before UI update
 
         // Update UI
-        ui::Interface::update();     // Handle UI logic
+        ui::Interface::update();         // Handle UI logic
 
         // Process MIDI
         midi::MIDI::process_incoming();
